@@ -1,44 +1,98 @@
 import 'package:flutter/material.dart';
 
+import 'models/workout_plan.dart';
+import 'screens/workout_form_screen.dart';
+
 void main() {
   runApp(const MovementQuestApp());
 }
 
 // Main application shell
+
 class MovementQuestApp extends StatelessWidget {
   const MovementQuestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const darkBlue = Color(0xFF173B70);
+    const darkGrey = Color(0xFF242424);
+
     return MaterialApp(
       title: 'Movement Quest',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        brightness: Brightness.dark,
+
+        colorScheme: const ColorScheme.dark(
+          primary: darkBlue,
+          onPrimary: Colors.white,
+          secondary: Color(0xFF82B4FF),
+          surface: Colors.black,
+          onSurface: Colors.white,
+        ),
+
+        scaffoldBackgroundColor: Colors.black,
+        canvasColor: Colors.black,
+        cardColor: darkGrey,
+
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          centerTitle: true,
+        ),
+
+        cardTheme: CardThemeData(
+          color: darkGrey,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: darkBlue,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          ),
+        ),
+
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: darkBlue,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          ),
+        ),
+
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF91BEFF)),
+        ),
+
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            side: const BorderSide(color: Color(0xFF5579AD)),
+          ),
+        ),
+
+        inputDecorationTheme: InputDecorationThemeData(
+          filled: true,
+          fillColor: darkGrey,
+          labelStyle: const TextStyle(color: Colors.white70),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+
+        sliderTheme: const SliderThemeData(
+          activeTrackColor: Color(0xFF82B4FF),
+          thumbColor: Color(0xFF82B4FF),
+          inactiveTrackColor: Color(0xFF555555),
+        ),
       ),
       home: const WorkoutDashboard(),
     );
   }
-}
-
-// Sample workout data
-class WorkoutPlan {
-  final String name;
-  final String exercise;
-  final String equipment;
-  final int sets;
-  final int reps;
-  final int intensity;
-
-  const WorkoutPlan({
-    required this.name,
-    required this.exercise,
-    required this.equipment,
-    required this.sets,
-    required this.reps,
-    required this.intensity,
-  });
 }
 
 // Dashboard with changing filter state
@@ -52,7 +106,7 @@ class WorkoutDashboard extends StatefulWidget {
 class _WorkoutDashboardState extends State<WorkoutDashboard> {
   String selectedEquipment = 'All';
 
-  final List<WorkoutPlan> workouts = const [
+  final List<WorkoutPlan> workouts = [
     WorkoutPlan(
       name: 'Full Body Basics',
       exercise: 'Squats',
@@ -85,6 +139,39 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
   void showComingSoon(String feature) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('$feature will be added next.')));
+  }
+
+  Future<void> _openWorkoutForm({WorkoutPlan? existingPlan}) async {
+    final result = await Navigator.push<WorkoutPlan>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkoutFormScreen(existingPlan: existingPlan),
+      ),
+    );
+
+    if (!mounted || result == null) return;
+
+    setState(() {
+      if (existingPlan == null) {
+        workouts.add(result);
+      } else {
+        final index = workouts.indexOf(existingPlan);
+
+        if (index != -1) {
+          workouts[index] = result;
+        }
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          existingPlan == null
+              ? 'Workout created successfully!'
+              : 'Workout updated successfully!',
+        ),
+      ),
+    );
   }
 
   @override
@@ -126,7 +213,7 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
                   const Icon(
                     Icons.emoji_events,
                     size: 40,
-                    color: Colors.deepPurple,
+                    color: Color(0xFF82B4FF),
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -192,13 +279,14 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
             (workout) => WorkoutCard(
               workout: workout,
               onStart: () => showComingSoon('${workout.name} workout tracking'),
+              onEdit: () => _openWorkoutForm(existingPlan: workout),
             ),
           ),
 
           const SizedBox(height: 20),
 
           ElevatedButton.icon(
-            onPressed: () => showComingSoon('Create Workout'),
+            onPressed: () => _openWorkoutForm(),
             icon: const Icon(Icons.add),
             label: const Text('Create New Workout'),
           ),
@@ -214,12 +302,17 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
   }
 }
 
-// Reusable stateless display widget
 class WorkoutCard extends StatelessWidget {
   final WorkoutPlan workout;
   final VoidCallback onStart;
+  final VoidCallback onEdit;
 
-  const WorkoutCard({super.key, required this.workout, required this.onStart});
+  const WorkoutCard({
+    super.key,
+    required this.workout,
+    required this.onStart,
+    required this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -240,16 +333,28 @@ class WorkoutCard extends StatelessWidget {
             ),
             Text('Intensity: ${workout.intensity}/10'),
             const SizedBox(height: 12),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Edit Workout'),
+                ),
+              ],
+            ),
+
             Align(
               alignment: Alignment.centerRight,
               child: FilledButton(
                 onPressed: onStart,
                 child: const Text('Start Quest'),
-              ),
-            ),
+              ), //Filled Button
+            ), //Align
           ],
-        ),
-      ),
-    );
+        ), //Column
+      ), //Padding
+    ); // Card
   }
 }
