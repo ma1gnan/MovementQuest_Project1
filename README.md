@@ -1,17 +1,66 @@
-# my_workout_partner
+# Movement Quest
 
-A new Flutter project.
+**Project 1 — Mobile Application Development**
 
-## Getting Started
+**Developer:** Deborah Maignan  
+**Pathway:** Undergraduate  
+**Framework:** Flutter / Dart  
+**Platform:** Android  
+**Development Tools:** Visual Studio Code and Android Studio  
 
-This project is a starting point for a Flutter application.
+## Project Overview
 
-A few resources to get you started if this is your first Flutter project:
+Movement Quest is a personal workout companion application designed to help GSU students create workout plans, track exercise progress, and review their training activities.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+This application uses a quest theme to make workout planning more engaging. Its goal is to provide a simple, organized workout.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Implementation
+
+### 1. Workout Dashboard
+
+The Workout Dashboard is the application's main screen.
+
+Current features include:
+
+- Displays some sample workout plans: Full Body Basics, Upper Body Quest, etc.
+- Displaying workoutnames, exercises, equipment, target sets, repetitions, and intensity.
+- Students can to filter workouts by equipment.
+- Displays an empty-state message when no workouts match.
+- Provides buttons to create workouts, edit existing workouts, and start a workout.
+
+### 2. Create/Edit Workout Screen
+
+The Create/Edit Workout screen gives students the option to enter and modify workout info.
+
+Implemented features include:
+
+- Workout name
+- Exercise name
+- Target sets and repetitions
+- Equipment selection
+- Intensity slider ranging from 1 to 10.
+- Save Workout, Save Changes, and Cancel buttons
+- Form validation for required fields and invalid numeric values
+
+New workouts are added to the dashboard, and existing workouts can be edited.
+
+
+### 3. Dark Theme
+
+Movement Quest uses a dark theme:
+
+| Interface Element | Color |
+|---|---|
+| Background | Black |
+| Workout | Dark Grey |
+| Primary buttons | Dark Blue |
+| Main text | White |
+| Other color | Light Blue |
+
+
+**File Responsibilities**
+
+- `main.dart`: Application entry point, theme, dashboard, workouts, and navigation.
+- `workout_plan.dart`: WorkoutPlan data model.
+- `workout_form_screen.dart`: Workout creation and editing.
+- `widget_test.dart`: Automated dashboard widget test.
