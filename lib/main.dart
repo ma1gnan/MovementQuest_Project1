@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'screens/active_workout_screen.dart';
 import 'database/database_helper.dart';
 import 'models/workout_plan.dart';
 import 'screens/workout_form_screen.dart';
+import 'screens/training_history_screen.dart';
 
 void main() {
   runApp(const MovementQuestApp());
@@ -191,6 +193,27 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
     }
   }
 
+  Future<void> _startWorkout(WorkoutPlan workout) async {
+    final completed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ActiveWorkoutScreen(workout: workout),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (completed == true) {
+      await _loadWorkouts();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Quest completed! Training log saved.')),
+      );
+    }
+  }
+
   // DELETE with confirmation
   Future<void> _deleteWorkout(WorkoutPlan workout) async {
     if (workout.id == null) return;
@@ -233,6 +256,17 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
         const SnackBar(content: Text('Unable to delete workout.')),
       );
     }
+  }
+
+  Future<void> _openTrainingHistory() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(builder: (context) => const TrainingHistoryScreen()),
+    );
+
+    if (!mounted) return;
+
+    await _loadWorkouts();
   }
 
   @override
@@ -355,8 +389,7 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
                 ...filteredWorkouts.map(
                   (workout) => WorkoutCard(
                     workout: workout,
-                    onStart: () =>
-                        showComingSoon('${workout.name} workout tracking'),
+                    onStart: () => _startWorkout(workout),
                     onEdit: () => _openWorkoutForm(existingPlan: workout),
                     onDelete: () => _deleteWorkout(workout),
                   ),
@@ -372,7 +405,7 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
                 const SizedBox(height: 12),
 
                 OutlinedButton.icon(
-                  onPressed: () => showComingSoon('Training History'),
+                  onPressed: _openTrainingHistory,
                   icon: const Icon(Icons.history),
                   label: const Text('View Training History'),
                 ),
