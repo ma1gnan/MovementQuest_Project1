@@ -5,6 +5,8 @@ import 'database/database_helper.dart';
 import 'models/workout_plan.dart';
 import 'screens/workout_form_screen.dart';
 import 'screens/training_history_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/recommendation_screen.dart';
 
 void main() {
   runApp(const MovementQuestApp());
@@ -269,6 +271,30 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
     await _loadWorkouts();
   }
 
+  Future<void> _openSettings() async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      // Refresh dashboard after returning from Settings.
+    });
+  }
+
+  Future<void> _openRecommendation() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(builder: (context) => const RecommendationScreen()),
+    );
+
+    if (!mounted) return;
+
+    await _loadWorkouts();
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredWorkouts = workouts.where((workout) {
@@ -284,7 +310,7 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
           IconButton(
             tooltip: 'Settings',
             icon: const Icon(Icons.settings),
-            onPressed: () => showComingSoon('Settings'),
+            onPressed: _openSettings,
           ),
         ],
       ),
@@ -401,6 +427,13 @@ class _WorkoutDashboardState extends State<WorkoutDashboard> {
                   onPressed: () => _openWorkoutForm(),
                   icon: const Icon(Icons.add),
                   label: const Text('Create New Workout'),
+                ),
+                const SizedBox(height: 12),
+
+                FilledButton.icon(
+                  onPressed: _openRecommendation,
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Find My Next Quest'),
                 ),
                 const SizedBox(height: 12),
 
